@@ -15,6 +15,7 @@ const getUserById = async (req, res) => {
         "SELECT id, name, email FROM users WHERE id = ?",
         [req.params.id]
     );
+    
     return res.status(200).json({
         message: "User Listed Successfully",
         data: rows[0]

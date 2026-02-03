@@ -19,6 +19,6 @@ db.query('SELECT 1')
 
 
 app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
+app.use("/users",auth, userRoutes);
 
 module.exports = app
