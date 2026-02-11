@@ -1,31 +1,27 @@
-import { useState } from "react";
-import axios from "../../api/axios";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import instance from '../../api/axios';
 
-export default function Login() {
+const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const submit = async (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (error) setError(""); // Clear error when user starts typing
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(""); // Reset error state
-
-    const form = e.target;
+    setError("");
 
     try {
-      const res = await axios.post("/auth/login", {
-        email: form.email.value,
-        password: form.password.value,
-      });
-
+      const res = await instance.post("/auth/login", formData);
       localStorage.setItem("token", res.data.token);
-
-      // Success Feedback
-      alert("Login successful!");
-      window.location.href = "/usermanagement"; // Simple redirect
+      window.location.href = "/usermanagement";
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid email or password");
+      setError(err.response?.data?.message || "Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -33,67 +29,74 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
-        {/* Branding/Header */}
+      <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-2xl shadow-xl border border-gray-100">
+
+        {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-            <span className="text-white font-bold text-xl">G</span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 italic tracking-tight">Welcome Back</h2>
-          <p className="mt-2 text-sm text-gray-500">Please enter your details to sign in.</p>
+          <h2 className="text-3xl font-extrabold text-gray-900">Welcome </h2>
+          <p className="mt-2 text-sm text-gray-500">Please enter your details to sign in</p>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center border border-red-100">
-            {error}
-          </div>
-        )}
-
-        <form className="mt-6 space-y-5" onSubmit={submit} noValidate>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">Email</label>
-            <input
-              name="email"
-              type="email"
-              required
-              placeholder="name@company.com"
-              className="mt-1 block w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-            />
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-semibold text-gray-700">Password</label>
-            
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 animate-pulse">
+              {error}
             </div>
-            <input
-              name="password"
-              type="password"
-              required
-              placeholder="••••••••"
-              className="mt-1 block w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-            />
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <input
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                placeholder="name@company.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                placeholder="••••••••"
+              />
+            </div>
           </div>
+
+        
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-gray-900 hover:bg-black text-white font-bold rounded-xl transition duration-300 transform active:scale-[0.98] disabled:bg-gray-400"
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {loading ? "Authenticating..." : "Sign In"}
+            {loading ? (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3balanced-3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              "Sign in"
+            )}
           </button>
         </form>
 
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-200"></span></div>
-          <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-gray-400">Or continue with</span></div>
-        </div>
-
-        <p className="text-center text-sm text-gray-600">
-          New here? <a href="/signup" className="text-blue-600 font-semibold hover:text-blue-700">Create an account</a>
+        <p className="text-center text-sm text-gray-500">
+          Don't have an account? <a href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">Sign up</a>
         </p>
       </div>
     </div>
   );
-}
+};
+
+export default Login;

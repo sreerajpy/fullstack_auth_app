@@ -14,6 +14,8 @@ export default function Users() {
     const [userToDelete, setUserToDelete] = useState(null); // Used for Delete
     const [isActionLoading, setIsActionLoading] = useState(false);
 
+    console.log("selectedUser", selectedUser);
+
     useEffect(() => { fetchUsers(); }, [isActionLoading]);
 
     const fetchUsers = async () => {
@@ -58,13 +60,39 @@ export default function Users() {
         } catch (err) { alert("Delete failed"); }
         finally { setIsActionLoading(false); }
     };
-    const handleLogout = () => {
-        // 1. Clear the token
-        localStorage.removeItem("token");
 
-        // 2. Redirect to login immediately
-        navigate("/login");
+
+    const handleLogout = async () => {
+        try {
+            await axios.post("/auth/logout");
+        } catch (e) {
+            console.log("Logout error (ignored)");
+        }
+
+        localStorage.removeItem("token");
+        window.location.href = "/login";
     };
+
+    // const handleLogout = () => {
+    //     // 1. Clear the token
+    //     localStorage.removeItem("token");
+
+    //     // 2. Redirect to login immediately
+    //     navigate("/login");
+    // };
+
+
+    const authCheck = async () => {
+        try {
+            await axios.post(`/auth/refresh`);
+        } catch (err) { alert("Auth check failed"); }
+        finally {
+        }
+    };
+
+    useEffect(() => {
+        // authCheck()
+    }, [])
     return (
         <div className="p-6 bg-gray-50 min-h-screen relative">
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

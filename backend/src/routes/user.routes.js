@@ -1,13 +1,15 @@
-const express = require('express')
-const router = express.Router()
-const user = require('../controllers/user.controller')
+const express = require("express");
+const router = express.Router();
 const auth = require("../middlewares/auth");
+const { getUsers, getUserById, updateUser, deleteUser } = require("../controllers/user.controller");
 
-router.get(`/`,  user.getUsers)
-router.get(`/:id`, user.getUserById)
-router.post(`/:id`, user.updateUser)
-router.delete(`/:id`, user.deleteUser)
+router.get("/me", auth, (req, res) => {
+    res.json({ message: "Protected route accessed!", user: req.user });
+});
 
-
+router.get(`/`, auth, getUsers)
+router.get(`/:id`, getUserById)
+router.post(`/:id`, updateUser)
+router.delete(`/:id`, deleteUser)
 
 module.exports = router;
